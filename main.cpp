@@ -262,6 +262,70 @@ bool collinear(Point p, Point q, Point r)
     return fabs(cross(toVector(p, q), toVector(p, r))) < EPS;
 }
 
+//============== Line using slope and intercept form===========
+struct line2
+{
+    double m, c;
+}; // another way to represent a line
+int PointsToLine2(Point p1, Point p2, line2 &l)
+{
+    if (p1.x == p2.x)   // special case: vertical line
+        {
+            l.m = INF; // l contains m = INF and c = x_value
+            l.c = p1.x; // to denote vertical line x = x_value
+            return 0; // we need this return variable to differentiate result
+        }
+    else
+        {
+            l.m = (double)(p1.y - p2.y) / (p1.x - p2.x);
+            l.c = p1.y - l.m * p1.x;
+            return 1; // l contains m and c of the line equation y = mx + c
+        }
+}
+
+//to compute line equation given a Point and gradient
+// convert Point and gradient/slope to line
+void PointSlopeToLine(Point p, double m, line &l)
+{
+    l.a = -m; // always -m
+    l.b = 1; // always 1
+    l.c = -((l.a * p.x) + (l.b * p.y));
+} // compute this
+
+
+void closestPoint(line l, Point p, Point &ans)
+{
+    line perpendicular; // perpendicular to l and pass through p
+    if (fabs(l.b) < EPS)   // special case 1: vertical line
+        {
+            ans.x = -(l.c);
+            ans.y = p.y;
+            return;
+        }
+    if (fabs(l.a) < EPS)   // special case 2: horizontal line
+        {
+            ans.x = p.x;
+            ans.y = -(l.c);
+            return;
+        }
+    PointSlopeToLine(p, 1 / l.a, perpendicular); // normal line
+// intersect line l with this perpendicular line
+// the intersection Point is the closest Point
+    areIntersect(l, perpendicular, ans);
+}
+
+
+// returns the reflection of Point on a line
+void reflectionPoint(line l, Point p, Point &ans)
+{
+    Point b;
+    closestPoint(l, p, b); // similar to distToLine
+    vec v = toVector(p, b); // create a vector
+    ans = translate(translate(p, v), v);
+} // translate p twice
+
+
+
 // ================ 2 D Object circles ===============
 
 // To check whether a Point p is inside a circle c of radius r or not
